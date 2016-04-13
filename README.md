@@ -25,6 +25,7 @@ OPTIONS:
 
 To display basic stats--
 give column index number -and/OR- column name
+
 $ csvnome <csvfile> <opts>
 
 ex.) show stats for column 4,5,10,age,weight
