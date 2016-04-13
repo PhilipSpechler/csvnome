@@ -1,0 +1,176 @@
+#!/usr/bin/env python
+
+# -*- coding: utf-8 -*-
+
+import os
+import sys
+import csv
+from collections import Counter
+
+import argparse
+parser = argparse.ArgumentParser(description=
+"""
+This is a python tool used to look at the contents of a given csv
+
+run it from the command line!
+
+***IMPORTANT***: 
+Before runing, first change your working directory to 
+the directory with the CSV file of interest
+
+BASIC USAGE:
+============
+$ cd <path_with_csv_file>
+$ csvnome <csvfile>
+
+OPTIONS:
+========
+
+To display basic stats--
+give column index number -and/OR- column name
+$ csvnome <csvfile> <opts>
+
+ex.) show stats for column 4,5,10,age,weight
+
+$ csvnome mycsvfile.csv 4,5,10,age,weight
+
+""",
+epilog="Written by: Philip Spechler",
+formatter_class=argparse.RawDescriptionHelpFormatter,)
+
+parser.add_argument('csvfile',help="name of csv file with extension")
+parser.add_argument('opts',help="the column index or names to analyze",
+                    nargs='?',
+                    default=argparse.SUPPRESS)
+args=parser.parse_args()
+
+separator="\n"+"%"*50
+
+#try to find the csv file given in stdin
+def find_csv(): 
+  if args.csvfile in os.listdir(os.getcwd()):
+    print "found your file: "+sys.argv[1]
+  else:
+    print "FATAL ERROR: file not found"
+    print "Change directory to directory with csv file"
+
+#set empty lists to populate with csv
+data=[]
+#load csv into memory as a list for later processing    
+def load_full_csv():
+  for row in csv.reader(open(sys.argv[1],'rU')):
+    data.append(row)
+  return data
+
+
+#Here we will test if row 0 of csv can be converted to ints
+#If it can, that means there are no strings in row 0, aka no header
+#If it cant, then print out header to examine variable names
+#prints each variable name to a newline for readability
+def show_headers():
+  for i in data[0]:
+    try:
+      int(i)
+      print "Warning: No Header Found!"
+      break
+    except ValueError:
+      print i
+
+#check for too much or too litle data for each row
+#by comparing len of rows to header
+#using a counter in for loop to identify row index
+def compare_rows_to_header():
+  incomplete_counter=0
+  excess_counter=0
+  row_counter=0
+  
+  #start couting for rows with too few data  
+  for row in data[1:]:
+    row_counter+=1
+    if len(row) < len(data[0]):
+      incomplete_counter+=1
+      print "Warning: row %i has too few data points!" %row_counter
+  print "%i rows out of %i rows have incomplete data" %(incomplete_counter,row_counter)
+
+  print "+"*25  
+
+  #start couting for rows with too much data
+  for row in data[1:]:
+    if len(row) > len(data[0]):
+      excess_counter+=1
+      print "Warning: row %i has too many data points!" %excess_counter
+  print "%i rows out of %i rows have excessive points" %(excess_counter,row_counter)
+
+
+#Here we will read the given columns (if any) from stdin
+#Stdin strings will try to be converted to ints for column numbers
+#If given a word string, we determine that words position in the column
+column_specifier=[]
+def determine_column_info():
+  if len(sys.argv) >=3:
+    givens=sys.argv[2].split(',')
+    for i in givens:
+      try:
+        column_specifier.append(int(i))
+      except ValueError:
+        column_specifier.append(data[0].index(i))
+    return column_specifier
+  else:
+    pass
+        
+def analyze_columns():
+  for i in column_specifier:
+    columns_with_float=[]
+    columns_with_str=[]
+    print "+"*25
+    print "Data for Column: "+data[0][i]
+    for row in range(len(data)):
+      if row>0:
+        try:
+          columns_with_float.append(float(data[row][i]))
+        except IndexError and ValueError:
+          columns_with_str.append(data[row][i])
+    try:
+      print "Min. Value of "+data[0][i]+": "+str(min(columns_with_float))
+      print "Max. Value of "+data[0][i]+": "+str(max(columns_with_float))
+      mean=sum(columns_with_float)//len(columns_with_float)    
+      print "Mean value of "+data[0][i]+": "+str(mean)
+    except ValueError:
+      print "Frequency of response: "
+      for i in Counter(columns_with_str).most_common():
+        print i
+  if len(sys.argv)==2:
+    print "Skipping. User did not specify"
+
+      
+#########HERE WE ACTUALLY RUN THE FUNCTIONS###############
+print separator
+print "Searching for file...\n"  
+find_csv()
+
+print separator
+
+print "loading csv data into memory..."
+load_full_csv()
+
+print separator
+
+print "Here are the column names found: \n"    
+show_headers()
+
+print separator
+
+print "Checking for incomplete or excess data:\n"
+compare_rows_to_header()
+
+#No stdout for determine_column_info--
+determine_column_info()
+
+print separator
+
+print "Column descriptives: \n"
+analyze_columns()
+
+print separator
+
+print "~*~ output finished =) ~*~"
