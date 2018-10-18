@@ -17,8 +17,8 @@ This is a python tool used to get a fast look at the contents of a given csv.
 
 Run it from the command line!
 
-BASIC USAGE:
-$ csvnome <csvfile>  
+BASIC USAGE:  
+$ csvnome <csv_file_name>   
 
 if pwd does not contain your csv--  
 $ csvnome <full_path_to_csv>
@@ -26,12 +26,12 @@ $ csvnome <full_path_to_csv>
 OPTION:  
 To display basic stats of a given column,
 give column index number -and/OR- column name
-
-$ csvnome <csvfile> <columns>  
+  
+$ csvnome <csv_file_name> <column_names_or_indices>
 
 *Use commas to separate all your columns of interest*
 
-ex.) get stats for column 4,5,10,age,weight  
+ex.) Display stats for column 4,5,10,age,weight  
 
 $ csvnome mycsvfile.csv 4,5,10,age,weight
 
