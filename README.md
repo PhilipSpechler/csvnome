@@ -1,10 +1,10 @@
-# CSV-reader
+# csvnome
 Do you ever wish you could take a quick peek inside a csv file without having to open excel or a text editor?  
 Good News! This little script can quickly make sense of your largest big data matrix.
 
-Add this script to your path and this script will become your new favorite command line tool
+Add csvnome to your path and this script will become your new favorite command line tool
 
-Running csvreader will display key info about your csvfile including--
+Running csvnome will display key info about your csvfile including--
 * matrix shape
 * column header names
 * Signs of excessive or missing data  
@@ -23,15 +23,15 @@ $ csvnome <csvfile>
 if pwd does not contain your csv--  
 $ csvnome <full_path_to_csv>
 
-OPTION:
+OPTION:  
 To display basic stats of a given column,
 give column index number -and/OR- column name
 
-$ csvnome <csvfile> <columns>
+$ csvnome <csvfile> <columns>  
 
 *Use commas to separate all your columns of interest*
 
-ex.) get stats for column 4,5,10,age,weight
+ex.) get stats for column 4,5,10,age,weight  
 
 $ csvnome mycsvfile.csv 4,5,10,age,weight
 
