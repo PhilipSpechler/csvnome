@@ -1,33 +1,39 @@
 # CSV-reader
-Command line tool to quickly read key info from a csv file.
-Key info includes
--excessive or missing data
--variable min,max,mean
--response frequenceies for variable values
+Do you ever wish you could take a quick peek inside a csv file without having to open excel or a text editor?  
+Good News! This little script can quickly make sense of your largest big data matrix.
 
-From the docstring:
+Add this script to your path and this script will become your new favorite command line tool
 
-This is a python tool used to look at the contents of a given csv
+Running csvreader will display key info about your csvfile including--
+* matrix shape
+* column header names
+* Signs of excessive or missing data  
 
-run it from the command line! (add to csvnome to your path)
+See a column name (or two, or twelve) you want to know more about?
+Run it again while specifying the column names or indices to retrieve the min, max, mean, and frequency distribution!
 
-***IMPORTANT***: 
-Before runing, first change your working directory to 
-the directory with the CSV file of interest
+## From the docstring:
+This is a python tool used to get a fast look at the contents of a given csv.
+
+Run it from the command line!
 
 BASIC USAGE:
-============
-$ cd <path_with_csv_file>
-$ csvnome <csvfile>
+$ csvnome <csvfile>  
 
-OPTIONS:
-========
+if pwd does not contain your csv--  
+$ csvnome <full_path_to_csv>
 
-To display basic stats--
+OPTION:
+To display basic stats of a given column,
 give column index number -and/OR- column name
 
-$ csvnome <csvfile> <opts>
+$ csvnome <csvfile> <columns>
 
-ex.) show stats for column 4,5,10,age,weight
+*Use commas to separate all your columns of interest*
+
+ex.) get stats for column 4,5,10,age,weight
 
 $ csvnome mycsvfile.csv 4,5,10,age,weight
+
+## Dependencies
+Written in python2.x
