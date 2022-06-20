@@ -36,5 +36,6 @@ ex.) Display stats for column 4,5,10,age,weight
 $ csvnome mycsvfile.csv 4,5,10,age,weight
 
 ## Dependencies
-Written in python2.x\n
+Written in python2.x
+
 Updated June 2022 For Python3 (finally)
