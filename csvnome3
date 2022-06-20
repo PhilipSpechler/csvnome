@@ -1,0 +1,202 @@
+#!/usr/bin/env python
+
+# -*- coding: utf-8 -*-
+
+import os
+import sys
+import csv
+from collections import Counter
+
+import argparse
+parser = argparse.ArgumentParser(description=
+"""
+This is a python tool used to get a fast look at the contents of a given csv.
+
+Run it from the command line!
+
+BASIC USAGE:
+============
+$ csvnome <csvfile>
+
+if pwd does not contain your csv--
+$ csvnome <full_path_to_csv>
+
+OPTION:
+========
+To display basic stats of a given column,
+give column index number -and/OR- column name
+
+$ csvnome <csvfile> <columns>
+
+Use commas to separate all your columns of interest
+
+ex.) get stats for column 4,5,10,age,weight
+
+$ csvnome mycsvfile.csv 4,5,10,age,weight
+
+""",
+epilog="Written by: Philip Spechler",
+formatter_class=argparse.RawDescriptionHelpFormatter,)
+
+parser.add_argument('csvfile',help="name of csv file with extension")
+parser.add_argument('columns',help="the column indices or names to analyze",
+                    nargs='?',
+                    default=argparse.SUPPRESS)
+args=parser.parse_args()
+
+separator="%"*55
+
+#try to find the csv file given in stdin
+def find_csv(): 
+  if args.csvfile in os.listdir(os.getcwd()):
+    print ("  Found your file: "+sys.argv[1])
+  elif os.path.isfile(args.csvfile):
+  	print ("  Found your csv file outside of working directory")
+  else:
+    print ("\tFATAL ERROR: file not found")
+    print ("Try changing directory to the directory with csv file")
+
+#set empty lists to populate with csv
+data=[]
+#load csv into memory as a list for later processing    
+def load_full_csv():
+  for row in csv.reader(open(sys.argv[1],'r')):
+    data.append(row)
+  return data
+
+#Here we will just print out csv matrix shape, accounting for headers
+def give_matrix_shape():
+  try:
+    int(data[0][1])
+    print ("  Your csv has matrix shape {0} rows by {1} columns".format(len(data),len(data[0])))
+    print ("    ** You don't have a row of headers **")
+  except ValueError:
+    print ("  Your csv has matrix shape {0} rows by {1} columns".format(len(data)-1,len(data[0])))
+
+
+#Here we will test if row 0 of csv can be converted to int
+#If it can, that means there are no strings in row 0, aka no header
+#If it cant, then print out header to examine variable names
+#prints each variable name to a newline for readability
+def show_headers():
+  for i in data[0]:
+    try:
+      int(i)
+      print ("    ** Warning: No Header Found! **")
+      break
+    except ValueError:
+      print ('\t'+i)
+      Headers=True
+
+#check for too much or too litle data for each row
+#by comparing len of rows to header
+#using a counter in for loop to identify row index
+def compare_rows_to_header():
+  incomplete_counter=0
+  excess_counter=0
+  row_counter=0
+  
+  #start couting for rows with too few data  
+  for row in data[1:]:
+    row_counter+=1
+    if len(row) < len(data[0]):
+      incomplete_counter+=1
+      print ("Warning: row %i has too few data points!" %row_counter)
+  print ("%i rows out of %i rows have incomplete data" %(incomplete_counter,row_counter))
+
+  print ("+"*45)
+
+  #start couting for rows with too much data
+  for row in data[1:]:
+    if len(row) > len(data[0]):
+      excess_counter+=1
+      print ("Warning: row %i has too many data points!" %excess_counter)
+  print ("%i rows out of %i rows have excessive points" %(excess_counter,row_counter))
+
+
+#Here we will read the given columns (if any) from stdin
+#Stdin strings will try to be converted to ints for column numbers
+#If given a word string, we determine that words position in the column
+column_specifier=[]
+ColumnsNotFound=[]
+def determine_column_info():
+    if len(sys.argv) >=3:
+        givens=sys.argv[2].split(',')
+        for i in givens:
+            try:
+                column_specifier.append(int(i))
+            except ValueError:
+                try:
+                    column_specifier.append(data[0].index(i))
+                except ValueError:#Catch the names of columns not found
+                	ColumnsNotFound.append(i)
+            return column_specifier
+    else:
+        givens=None
+        pass
+        
+def analyze_columns():
+  columns2use=[]
+  #First check if there are any indexes out of range, or names of columns not found
+  for i in column_specifier:
+  	if int(i)<len(data[0]):
+  	  columns2use.append(i)
+  	else:
+  	  print ("\tUser input column index \'{}' exceeds the number of colums. Skipping".format(i))
+  if len(ColumnsNotFound)>0:
+    for i in ColumnsNotFound:
+    	print ("\tUser input column name \'{0}' not found. Skipping".format(i))	  
+  for i in columns2use:
+    columns_with_float=[]
+    columns_with_str=[]
+    print ("+"*25)
+    print ("Descriptives for Column: "+data[0][i])
+    for row in range(len(data)):
+      if row>0:
+        try:
+          columns_with_float.append(float(data[row][i]))
+        except IndexError and ValueError:
+          columns_with_str.append(data[row][i])
+    try:
+      print ("\tMin. Value of "+data[0][i]+": "+str(min(columns_with_float)))
+      print ("\tMax. Value of "+data[0][i]+": "+str(max(columns_with_float)))
+      mean=sum(columns_with_float)//len(columns_with_float)    
+      print ("\tMean value of "+data[0][i]+": "+str(mean))
+      print ("Frequency of response:")
+      for i in Counter(columns_with_float).most_common():
+      	print ('\t',i)
+    except ValueError:
+      print ("Frequency of response for:")
+      for i in Counter(columns_with_str).most_common():
+        print ('\t',i)
+  if len(sys.argv)==2:
+    print ("Skipping. User did not specify any columns")
+
+      
+#########HERE WE ACTUALLY RUN THE FUNCTIONS###############
+print (separator)
+print ("Searching for file...")
+find_csv()
+print (separator)
+
+print ("loading csv data into memory...")
+load_full_csv()
+give_matrix_shape()
+print (separator)
+
+print ("Here are the column names found: ")
+show_headers()
+print (separator)
+
+print ("Checking for incomplete or excess data:\n")
+compare_rows_to_header()
+
+#No stdout for determine_column_info--
+determine_column_info()
+print (separator)
+
+print ("Column descriptives: ")
+analyze_columns()
+print (separator)
+
+print ("~*~ output finished =) ~*~\n")
