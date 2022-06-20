@@ -130,7 +130,7 @@ def determine_column_info():
                     column_specifier.append(data[0].index(i))
                 except ValueError:#Catch the names of columns not found
                 	ColumnsNotFound.append(i)
-            return column_specifier
+        return column_specifier
     else:
         givens=None
         pass
